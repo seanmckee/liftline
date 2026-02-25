@@ -187,8 +187,11 @@ function WorkoutDetail() {
                                         </li>
                                     ))}
                                 </ul>
+                                <button type="button" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-sm transition-colors" >Add Set</button>
                             </div>
                         ))}
+                        
+                        <button type="button" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-sm transition-colors" >Add Exercise</button>
                     </div>
 
                     <button

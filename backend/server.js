@@ -391,7 +391,7 @@ app.use((error, req, res, next) => {
   console.error(error);
   
   // Handle specific error types
-  if (error.code === '23505') {  // PostgreSQL unique violation
+  if (error.code === '23505') {  
     return res.status(409).json({ error: 'Email already exists' });
   }
   
