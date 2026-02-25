@@ -42,27 +42,60 @@ function Workouts() {
     useEffect(() => {
         getWorkouts();
     }, []);
-    return (
-        <div className='font-bold'>
-            <h1>Workouts</h1>
-            {!showForm &&
-            <button 
-                onClick={() => setShowForm(!showForm)}
-            >
-                Add Workout
-            </button>
-            }
-            {showForm && <WorkoutForm setShowForm={setShowForm} getWorkouts={getWorkouts} />}
-            <ul>
-                {workouts.map((workout) => (
-                    <li key={workout.id}>
-                        {workout.name}
-                        <button onClick={() => navigate(`/workouts/${workout.id}`)}>View</button>
-                        <button onClick={() => deleteWorkout(workout.id)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
 
+    return (
+        <div className="min-h-screen bg-gray-950 px-4 py-8">
+            <div className="max-w-2xl mx-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-extrabold text-white">My Workouts</h1>
+                    {!showForm && (
+                        <button
+                            onClick={() => setShowForm(true)}
+                            className="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                        >
+                            + Add Workout
+                        </button>
+                    )}
+                </div>
+
+                {/* Inline form */}
+                {showForm && (
+                    <div className="mb-6">
+                        <WorkoutForm setShowForm={setShowForm} getWorkouts={getWorkouts} />
+                    </div>
+                )}
+
+                {/* Workout list */}
+                {workouts.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center mt-12">No workouts yet. Add one to get started!</p>
+                ) : (
+                    <ul className="flex flex-col gap-3">
+                        {workouts.map((workout) => (
+                            <li
+                                key={workout.id}
+                                className="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 flex items-center justify-between"
+                            >
+                                <span className="text-white font-medium">{workout.name}</span>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => navigate(`/workouts/${workout.id}`)}
+                                        className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm px-3 py-1.5 rounded-lg transition-colors"
+                                    >
+                                        View
+                                    </button>
+                                    <button
+                                        onClick={() => deleteWorkout(workout.id)}
+                                        className="bg-red-900/40 hover:bg-red-800/60 text-red-400 text-sm px-3 py-1.5 rounded-lg transition-colors"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
         </div>
     );
 }

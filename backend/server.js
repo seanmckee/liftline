@@ -279,15 +279,63 @@ app.put("/sets/:id", requireAuth, async (req, res, next) => {
     }
 });
 
-app.put("/workout/:id/full", requireAuth, async (req, res, next) => {
+app.put("/workouts/:id/full", requireAuth, async (req, res, next) => {
+    const client = await pool.connect();
+    
     try {
-        const userId = req.userId;
-        //TODO: Implement full workout update
+      await client.query('BEGIN');
+      
+      const { workout_name, workout_date, exercises } = req.body;
+      const workoutId = req.params.id;
+      
+      // Verify ownership
+      const workoutResult = await client.query(
+        'SELECT * FROM workouts WHERE id = $1 AND user_id = $2',
+        [workoutId, req.userId]
+      );
+      
+      if (workoutResult.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: "Workout not found" });
+      }
+      
+      // Update workout
+      await client.query(
+        'UPDATE workouts SET name = $1, workout_date = $2 WHERE id = $3',
+        [workout_name, workout_date, workoutId]
+      );
+      
+      // Delete existing exercises/sets
+      await client.query('DELETE FROM exercises WHERE workout_id = $1', [workoutId]);
+      
+      // Insert new exercises and sets
+      for (let i = 0; i < exercises.length; i++) {
+        const exercise = exercises[i];
+        
+        const exerciseResult = await client.query(
+          'INSERT INTO exercises (workout_id, name, notes, exercise_order) VALUES ($1, $2, $3, $4) RETURNING *',
+          [workoutId, exercise.exercise_name, exercise.exercise_notes || '', i + 1]
+        );
+        
+        for (let j = 0; j < exercise.sets.length; j++) {
+          const set = exercise.sets[j];
+          await client.query(
+            'INSERT INTO sets (exercise_id, reps, weight, set_order) VALUES ($1, $2, $3, $4)',
+            [exerciseResult.rows[0].id, set.reps, set.weight, j + 1]
+          );
+        }
+      }
+      
+      await client.query('COMMIT');
+      res.json({ message: "Workout updated successfully" });
+      
     } catch (error) {
-        next(error);
+      await client.query('ROLLBACK');
+      next(error);
+    } finally {
+      client.release();
     }
-})
-
+  });
 // DELETE endpoints
 app.delete("/workouts/:id", requireAuth, async (req, res, next) => {
     try {
