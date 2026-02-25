@@ -4,8 +4,30 @@ import { useParams, Link } from 'react-router-dom';
 
 function WorkoutDetail() {
 
-    const [workout, setWorkout] = useState(null);
     const { id } = useParams();
+
+    const [workoutName, setWorkoutName] = useState('');
+    const [workoutDate, setWorkoutDate] = useState('');
+    const [exercises, setExercises] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const handleExerciseChange = (exerciseId, setId, name, reps, weight) => {
+        const updatedExercises = exercises.map(exercise => {
+            if(exercise.exercise_id === exerciseId){
+                return {
+                    ...exercise,
+                    exercise_name: name ?? exercise.exercise_name,
+                    sets: exercise.sets.map(set => set.set_id === setId ? { 
+                        ...set, 
+                        reps: reps ?? set.reps, 
+                        weight: weight ?? set.weight 
+                    } : set)
+                };
+            }
+            return exercise;
+        });
+        setExercises(updatedExercises);
+    }
 
     const getWorkout = async () => {
         try {
@@ -17,20 +39,17 @@ function WorkoutDetail() {
                 }
             });
             
-            let workout = response.data
+            let workout = response.data;
             for(let i = 0; i < workout.length; i++){
-                // Group by exercise_id, not workout_name
                 if(!exercisesMap[workout[i].exercise_id]){
                   exercisesMap[workout[i].exercise_id] = {
                     exercise_id: workout[i].exercise_id,
                     exercise_name: workout[i].exercise_name,
                     exercise_notes: workout[i].exercise_notes,
-                    sets: []  // Array to hold sets
+                    sets: []
                   };
                 }
-                
-                // Add the set to this exercise
-                if (workout[i].set_id) {  // Only if set exists
+                if (workout[i].set_id) {
                   exercisesMap[workout[i].exercise_id].sets.push({
                     set_id: workout[i].set_id,
                     reps: workout[i].reps,
@@ -39,16 +58,12 @@ function WorkoutDetail() {
                 }
               }
               
-              // Convert to array
-              const exercises = Object.values(exercisesMap);
+            const parsedExercises = Object.values(exercisesMap);
 
-            console.log("Exercises ", exercises);
-            console.log("date", workout[0].workout_date)
-            setWorkout({
-                name: workout[0].workout_name,
-                date: workout[0].workout_date,
-                exercises: exercises
-            });
+            setWorkoutName(workout[0].workout_name);
+            setWorkoutDate(workout[0].workout_date);
+            setExercises(parsedExercises);
+            setLoading(false);
         } catch (error) {
             console.error('Error getting workout:', error);
         }
@@ -56,55 +71,60 @@ function WorkoutDetail() {
 
     const handleEditSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form submitted");
-        
+        try {
+            // TODO: Finish route and update handleEditSubmit function
+        } catch (error) {
+            console.error('Error editing workout:', error);
+        }
     }
 
     useEffect(() => {
         getWorkout();
     }, []);
 
-    if (!workout) {
+    if (loading) {
         return <div>Loading...</div>;
-      }
+    }
+
     return (
         <div>
-            <Link to="/workouts">Back</Link>
-                
-                {/* Workout edit form */}
-                <form onSubmit={handleEditSubmit}>
-                    <div className='flex'>
+            <button className='bg-blue-500 text-white p-2 rounded-md'>
+                <Link to="/workouts">Back</Link>
+            </button>
+            
+            <form className='flex flex-col gap-2' onSubmit={handleEditSubmit}>
+                <div className='flex'>
                     <label htmlFor="name">Workout Name:</label>
-                    <input type="text" placeholder='Workout Name' value={workout.name} />
+                    <input type="text" placeholder='Workout Name' value={workoutName} onChange={(e) => setWorkoutName(e.target.value)} />
                     <label htmlFor="date">Workout Date:</label>
-                    <input type="date" placeholder='Workout Date' value={new Date(workout.date).toISOString().split('T')[0]} />
-                    </div>
-                    
-                </form>
-
-                <h1>{workout.name}</h1>
-                <h2>{new Date(workout.date).toLocaleDateString()}</h2>                
-                <h3>Exercises</h3>
-                <ul>
-                    {workout.exercises.map(exercise => {
-                        return (
-                            <li key={exercise.exercise_id}>
-                                <h3>{exercise.exercise_name}</h3>
-                                <ul>
-                                {exercise.sets.map(set => {
-                                    return (
-                                        <li key={set.set_id}>
-                                            <p>{"Reps: " + set.reps + " Weight: " + set.weight}</p>
-                                        </li>
-                                    )
-                                })}
-                                </ul>
-                            </li>
-                        )
-                    })}
-                </ul>
-            </div>
-        );
-    }
+                    <input type="date" placeholder='Workout Date' value={new Date(workoutDate).toISOString().split('T')[0]} onChange={(e) => setWorkoutDate(e.target.value)} />
+                </div>
+                <div className='flex flex-col gap-2'>
+                    <h3 className='text-lg font-bold'>Exercises</h3>
+                    <ul>
+                        {exercises.map(exercise => {
+                            return (
+                                <li key={exercise.exercise_id}>
+                                    <input type="text" placeholder='Exercise Name' value={exercise.exercise_name} onChange={(e) => handleExerciseChange(exercise.exercise_id, null, e.target.value, null, null)} />
+                                    <ul>
+                                        {exercise.sets.map(set => {
+                                            return (
+                                                <li key={set.set_id}>
+                                                    Reps: <input type="number" placeholder='Reps' value={set.reps} onChange={(e) => handleExerciseChange(exercise.exercise_id, set.set_id, null, e.target.value, null)} /> 
+                                                    Weight: <input type="number" placeholder='Weight' value={set.weight} onChange={(e) => handleExerciseChange(exercise.exercise_id, set.set_id, null, null, e.target.value)} />
+                                                </li>
+                                            )
+                                        })}
+                                    </ul>
+                                </li>
+                            )
+                        })}
+                    </ul>
+                </div>
+                <button type="submit">Submit Changes</button>
+            </form>
+        </div>
+    );
+}
 
 export default WorkoutDetail;

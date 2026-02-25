@@ -279,6 +279,15 @@ app.put("/sets/:id", requireAuth, async (req, res, next) => {
     }
 });
 
+app.put("/workout/:id/full", requireAuth, async (req, res, next) => {
+    try {
+        const userId = req.userId;
+        //TODO: Implement full workout update
+    } catch (error) {
+        next(error);
+    }
+})
+
 // DELETE endpoints
 app.delete("/workouts/:id", requireAuth, async (req, res, next) => {
     try {
