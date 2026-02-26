@@ -303,7 +303,7 @@ function WorkoutDetail() {
                                     set.set_id,
                                     null,
                                     val,
-                                    null,
+                                    set.weight,
                                   );
                                 }}
                                 className="bg-gray-800 border border-gray-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -318,7 +318,7 @@ function WorkoutDetail() {
                                     exercise.exercise_id,
                                     set.set_id,
                                     null,
-                                    null,
+                                    set.reps,
                                     val,
                                   );
                                 }}
