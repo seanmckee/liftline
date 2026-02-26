@@ -16,7 +16,8 @@ function WorkoutDetail() {
       if (exercise.exercise_id === exerciseId) {
         return {
           ...exercise,
-          exercise_name: name !== undefined && name !== null ? name : exercise.exercise_name,
+          exercise_name:
+            name !== undefined && name !== null ? name : exercise.exercise_name,
           sets: exercise.sets.map((set) =>
             set.set_id === setId
               ? {
@@ -45,7 +46,6 @@ function WorkoutDetail() {
 
       let workout = response.data;
       for (let i = 0; i < workout.length; i++) {
-        // Skip rows with no exercise (workout-only metadata from LEFT JOIN)
         if (workout[i].exercise_id == null) continue;
         if (!exercisesMap[workout[i].exercise_id]) {
           exercisesMap[workout[i].exercise_id] = {
@@ -297,7 +297,10 @@ function WorkoutDetail() {
                                 placeholder="—"
                                 value={set.reps ?? ""}
                                 onChange={(e) => {
-                                  const val = e.target.value === "" ? null : e.target.value;
+                                  const val =
+                                    e.target.value === ""
+                                      ? null
+                                      : e.target.value;
                                   handleExerciseChange(
                                     exercise.exercise_id,
                                     set.set_id,
@@ -313,7 +316,10 @@ function WorkoutDetail() {
                                 placeholder="—"
                                 value={set.weight ?? ""}
                                 onChange={(e) => {
-                                  const val = e.target.value === "" ? null : e.target.value;
+                                  const val =
+                                    e.target.value === ""
+                                      ? null
+                                      : e.target.value;
                                   handleExerciseChange(
                                     exercise.exercise_id,
                                     set.set_id,
@@ -328,7 +334,10 @@ function WorkoutDetail() {
                                 type="button"
                                 className="w-14 text-red-400 hover:text-red-300 hover:bg-red-900/30 p-2 rounded-lg text-xs font-medium transition-colors"
                                 onClick={() =>
-                                  handleDeleteSet(exercise.exercise_id, set.set_id)
+                                  handleDeleteSet(
+                                    exercise.exercise_id,
+                                    set.set_id,
+                                  )
                                 }
                                 title="Delete set"
                               >
